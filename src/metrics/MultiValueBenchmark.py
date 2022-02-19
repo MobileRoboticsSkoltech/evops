@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 import numpy as np
 from nptyping import NDArray
@@ -12,7 +12,7 @@ def __multi_value_benchmark(
     pred_labels: NDArray[Any, np.int32],
     gt_labels: NDArray[Any, np.int32],
     overlap_threshold: np.float64 = 0.8,
-) -> (np.float64, np.float64, np.float64, np.float64, np.float64, np.float64):
+) -> Dict[str, np.float64]:
     correctly_segmented_amount = 0
     plane_predicted_dict = __group_indices_by_labels(pred_labels)
     plane_gt_dict = __group_indices_by_labels(gt_labels)
@@ -26,38 +26,46 @@ def __multi_value_benchmark(
     noise_amount = 0
 
     overlapped_predicted_by_gt = {label: [] for label in plane_gt_dict.keys()}
+    part_overlapped_predicted_by_gt = {label: [] for label in plane_gt_dict.keys()}
 
     for predicted_label, predicted_plane in plane_predicted_dict.items():
         overlapped_gt_planes = []
+        part_overlapped_gt_planes = []
         for gt_label, gt_plane in plane_gt_dict.items():
-            are_well_overlapped = __are_nearly_overlapped(
+            are_well_overlapped, are_part_overlapped = __are_nearly_overlapped(
                 predicted_plane, gt_plane, overlap_threshold
             )
             if are_well_overlapped:
                 overlapped_gt_planes.append(gt_plane)
                 overlapped_predicted_by_gt[gt_label].append(predicted_label)
 
+            if are_part_overlapped:
+                part_overlapped_gt_planes.append(gt_plane)
+                part_overlapped_predicted_by_gt[gt_label].append(predicted_label)
+
         if len(overlapped_gt_planes) > 0:
             correctly_segmented_amount += 1
         else:
             noise_amount += 1
 
-        if len(overlapped_gt_planes) > 1:
+        if len(part_overlapped_gt_planes) > 1:
             under_segmented_amount += 1
 
-    over_segmented_amount = 0
     missed_amount = 0
     for overlapped in overlapped_predicted_by_gt.values():
-        if len(overlapped) > 1:
-            over_segmented_amount += 1
-        elif len(overlapped) == 0:
+        if len(overlapped) == 0:
             missed_amount += 1
 
-    return (
-        correctly_segmented_amount / predicted_amount,
-        correctly_segmented_amount / gt_amount,
-        under_segmented_amount / predicted_amount,
-        over_segmented_amount / gt_amount,
-        missed_amount / gt_amount,
-        noise_amount / predicted_amount,
-    )
+    over_segmented_amount = 0
+    for part_overlapped in part_overlapped_predicted_by_gt.values():
+        if len(part_overlapped) > 1:
+            over_segmented_amount += 1
+
+    return {
+        "precision": correctly_segmented_amount / predicted_amount,
+        "recall": correctly_segmented_amount / gt_amount,
+        "under_segmented": under_segmented_amount / predicted_amount,
+        "over_segmented": over_segmented_amount / gt_amount,
+        "missed": missed_amount / gt_amount,
+        "noise": noise_amount / predicted_amount,
+    }

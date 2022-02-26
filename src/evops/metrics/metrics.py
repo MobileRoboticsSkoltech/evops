@@ -1,16 +1,26 @@
+# Copyright (c) 2022, Skolkovo Institute of Science and Technology (Skoltech)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from typing import Callable, Any
-
-import numpy as np
 from nptyping import NDArray
 
-from src.metrics.DefaultMetrics import __precision, __accuracy, __recall, __fScore
-from src.metrics.DiceBenchmark import __dice
-from src.metrics.IoUBenchmark import __iou
-from src.metrics.MultiValueBenchmark import __multi_value_benchmark
-from src.metrics.Mean import __mean
+from evops.metrics.DefaultMetrics import __precision, __accuracy, __recall, __fScore
+from evops.metrics.DiceBenchmark import __dice
+from evops.metrics.IoUBenchmark import __iou
+from evops.metrics.MultiValueBenchmark import __multi_value_benchmark
+from evops.metrics.Mean import __mean
 
-
-UNSEGMENTED_LABEL = 0
+import numpy as np
 
 
 def iou(

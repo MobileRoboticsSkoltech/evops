@@ -7,8 +7,8 @@
 # -- Project information -----------------------------------------------------
 
 project = u"evops"
-copyright = u"2021, Dmitriy Jarosh"
-author = u"Dmitriy Jarosh"
+copyright = u"2022, Skolkovo Institute of Science and Technology (Skoltech)"
+author = u"Dmitriy Jarosh, Pavel Mokeev"
 
 # -- General configuration ---------------------------------------------------
 

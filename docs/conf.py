@@ -6,9 +6,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u"evops"
-copyright = u"2022, Skolkovo Institute of Science and Technology (Skoltech)"
-author = u"Dmitriy Jarosh, Pavel Mokeev"
+project = "evops"
+copyright = "2022, Skolkovo Institute of Science and Technology (Skoltech)"
+author = "Dmitriy Jarosh, Pavel Mokeev"
 
 # -- General configuration ---------------------------------------------------
 

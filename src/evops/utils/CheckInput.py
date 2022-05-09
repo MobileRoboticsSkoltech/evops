@@ -16,38 +16,32 @@ from nptyping import NDArray
 
 import numpy as np
 
-import evops.metrics.constants
-from evops.utils.MetricsUtils import __get_tp, __filter_unsegmented
+from evops.utils.MetricsUtils import __statistics_functions
 
 
-def __precision(
+def __default_benchmark_asserts(
     pred_labels: NDArray[Any, np.int32],
     gt_labels: NDArray[Any, np.int32],
     tp_condition: str,
-) -> np.float64:
-    true_positive = __get_tp(pred_labels, gt_labels, tp_condition)
-    pred_labels = __filter_unsegmented(pred_labels)
+):
+    assert (
+        len(pred_labels.shape) == 1
+    ), "Incorrect predicted label array size, expected (n)"
+    assert (
+        len(gt_labels.shape) == 1
+    ), "Incorrect ground truth label array size, expected (n)"
+    assert pred_labels.size != 0, "Predicted labels array size must not be zero"
+    assert tp_condition in __statistics_functions, "Incorrect name of tp condition"
 
-    return true_positive / np.unique(pred_labels).size
 
-
-def __recall(
+def __iou_dice_mean_bechmark_asserts(
     pred_labels: NDArray[Any, np.int32],
     gt_labels: NDArray[Any, np.int32],
-    tp_condition: str,
-) -> np.float64:
-    true_positive = __get_tp(pred_labels, gt_labels, tp_condition)
-    gt_labels = __filter_unsegmented(gt_labels)
-
-    return true_positive / np.unique(gt_labels).size
-
-
-def __fScore(
-    pred_labels: NDArray[Any, np.int32],
-    gt_labels: NDArray[Any, np.int32],
-    tp_condition: str,
-) -> np.float64:
-    precision = __precision(pred_labels, gt_labels, tp_condition)
-    recall = __recall(pred_labels, gt_labels, tp_condition)
-
-    return 2 * precision * recall / (precision + recall)
+):
+    assert (
+        len(pred_labels.shape) == 1
+    ), "Incorrect predicted label array size, expected (n)"
+    assert (
+        len(gt_labels.shape) == 1
+    ), "Incorrect ground truth label array size, expected (n)"
+    assert pred_labels.size + gt_labels.size != 0, "Array sizes must be positive"

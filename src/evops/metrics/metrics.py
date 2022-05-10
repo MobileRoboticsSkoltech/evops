@@ -14,18 +14,23 @@
 from typing import Callable, Any
 from nptyping import NDArray
 
-from evops.metrics.DefaultMetrics import __precision, __accuracy, __recall, __fScore
+from evops.metrics.DefaultBenchmark import __precision, __recall, __fScore
 from evops.metrics.DiceBenchmark import __dice
 from evops.metrics.IoUBenchmark import __iou
 from evops.metrics.MultiValueBenchmark import __multi_value_benchmark
-from evops.metrics.Mean import __mean
+from evops.metrics.MeanBenchmark import __mean
 
 import numpy as np
 
+from evops.utils.CheckInput import (
+    __default_benchmark_asserts,
+    __iou_dice_mean_bechmark_asserts,
+)
+
 
 def iou(
-    pred_indices: NDArray[Any, np.int32],
-    gt_indices: NDArray[Any, np.int32],
+    pred_labels: NDArray[Any, np.int32],
+    gt_labels: NDArray[Any, np.int32],
 ) -> np.float64:
     """
     :param pc_points: source point cloud
@@ -33,119 +38,75 @@ def iou(
     :param gt_indices: indices of points belonging to the reference plane
     :return: iou metric value for plane
     """
-    assert (
-        len(pred_indices.shape) == 1
-    ), "Incorrect predicted label array size, expected (n)"
-    assert (
-        len(gt_indices.shape) == 1
-    ), "Incorrect ground truth label array size, expected (n)"
-    assert pred_indices.size + gt_indices.size != 0, "Array sizes must be positive"
+    __iou_dice_mean_bechmark_asserts(pred_labels, gt_labels)
 
-    return __iou(pred_indices, gt_indices)
+    return __iou(pred_labels, gt_labels)
 
 
 def dice(
-    pred_indices: NDArray[Any, np.int32],
-    gt_indices: NDArray[Any, np.int32],
+    pred_labels: NDArray[Any, np.int32],
+    gt_labels: NDArray[Any, np.int32],
 ) -> np.float64:
     """
     :param pc_points: source point cloud
-    :param pred_indices: indices of points that belong to one plane obtained as a result of segmentation
-    :param gt_indices: indices of points belonging to the reference plane
+    :param pred_labels: labels of points that belong to one planes obtained as a result of segmentation
+    :param gt_labels: labels of points belonging to the reference planes
     :return: iou metric value for plane
     """
-    assert (
-        len(pred_indices.shape) == 1
-    ), "Incorrect predicted label array size, expected (n)"
-    assert (
-        len(gt_indices.shape) == 1
-    ), "Incorrect ground truth label array size, expected (n)"
-    assert pred_indices.size + gt_indices.size != 0, "Array sizes must be positive"
+    __iou_dice_mean_bechmark_asserts(pred_labels, gt_labels)
 
-    return __dice(pred_indices, gt_indices)
+    return __dice(pred_labels, gt_labels)
 
 
 def precision(
-    pred_indices: NDArray[Any, np.int32],
-    gt_indices: NDArray[Any, np.int32],
+    pred_labels: NDArray[Any, np.int32],
+    gt_labels: NDArray[Any, np.int32],
+    tp_condition: str,
 ) -> np.float64:
     """
     :param pc_points: source point cloud
-    :param pred_indices: indices of points that belong to one plane obtained as a result of segmentation
-    :param gt_indices: indices of points belonging to the reference plane
+    :param pred_labels: labels of points that belong to one planes obtained as a result of segmentation
+    :param gt_labels: labels of points belonging to the reference planes
+    :param tp_condition: helper function to calculate statistics: {'iou'}
     :return: precision metric value for plane
     """
-    assert (
-        len(pred_indices.shape) == 1
-    ), "Incorrect predicted label array size, expected (n)"
-    assert (
-        len(gt_indices.shape) == 1
-    ), "Incorrect ground truth label array size, expected (n)"
-    assert pred_indices.size != 0, "Predicted indices array size must not be zero"
+    __default_benchmark_asserts(pred_labels, gt_labels, tp_condition)
 
-    return __precision(pred_indices, gt_indices)
-
-
-def accuracy(
-    pred_indices: NDArray[Any, np.int32],
-    gt_indices: NDArray[Any, np.int32],
-) -> np.float64:
-    """
-    :param pc_points: source point cloud
-    :param pred_indices: indices of points that belong to one plane obtained as a result of segmentation
-    :param gt_indices: indices of points belonging to the reference plane
-    :return: accuracy metric value for plane
-    """
-    assert (
-        len(pred_indices.shape) == 1
-    ), "Incorrect predicted label array size, expected (n)"
-    assert (
-        len(gt_indices.shape) == 1
-    ), "Incorrect ground truth label array size, expected (n)"
-
-    return __accuracy(pred_indices, gt_indices)
+    return __precision(pred_labels, gt_labels, tp_condition)
 
 
 def recall(
-    pred_indices: NDArray[Any, np.int32],
-    gt_indices: NDArray[Any, np.int32],
+    pred_labels: NDArray[Any, np.int32],
+    gt_labels: NDArray[Any, np.int32],
+    tp_condition: str,
 ) -> np.float64:
     """
     :param pc_points: source point cloud
-    :param pred_indices: indices of points that belong to one plane obtained as a result of segmentation
-    :param gt_indices: indices of points belonging to the reference plane
+    :param pred_labels: indices of points that belong to one plane obtained as a result of segmentation
+    :param gt_labels: indices of points belonging to the reference plane
+    :param tp_condition: helper function to calculate statistics: {'iou'}
     :return: recall metric value for plane
     """
-    assert (
-        len(pred_indices.shape) == 1
-    ), "Incorrect predicted label array size, expected (n)"
-    assert (
-        len(gt_indices.shape) == 1
-    ), "Incorrect ground truth label array size, expected (n)"
-    assert gt_indices.size != 0, "Ground truth indices array size must not be zero"
+    __default_benchmark_asserts(pred_labels, gt_labels, tp_condition)
 
-    return __recall(pred_indices, gt_indices)
+    return __recall(pred_labels, gt_labels, tp_condition)
 
 
 def fScore(
-    pred_indices: NDArray[Any, np.int32],
-    gt_indices: NDArray[Any, np.int32],
+    pred_labels: NDArray[Any, np.int32],
+    gt_labels: NDArray[Any, np.int32],
+    tp_condition: str,
 ) -> np.float64:
     """
     :param pc_points: source point cloud
-    :param pred_indices: indices of points that belong to one plane obtained as a result of segmentation
-    :param gt_indices: indices of points belonging to the reference plane
+    :param pred_labels: indices of points that belong to one plane obtained as a result of segmentation
+    :param gt_labels: indices of points belonging to the reference plane
+    :param tp_condition: helper function to calculate statistics: {'iou'}
     :return: f-score metric value for plane
     """
-    assert (
-        len(pred_indices.shape) == 1
-    ), "Incorrect predicted label array size, expected (n)"
-    assert (
-        len(gt_indices.shape) == 1
-    ), "Incorrect ground truth label array size, expected (n)"
-    assert gt_indices.size != 0, "Ground truth indices array size must not be zero"
+    __default_benchmark_asserts(pred_labels, gt_labels, tp_condition)
 
-    return __fScore(pred_indices, gt_indices)
+    return __fScore(pred_labels, gt_labels, tp_condition)
 
 
 def mean(
@@ -163,12 +124,7 @@ def mean(
     :param metric: metric function for which you want to get the mean value
     :return: list of mean value for each metric
     """
-    assert (
-        len(pred_labels.shape) == 1
-    ), "Incorrect predicted label array size, expected (n)"
-    assert (
-        len(gt_labels.shape) == 1
-    ), "Incorrect ground truth label array size, expected (n)"
+    __iou_dice_mean_bechmark_asserts(pred_labels, gt_labels)
 
     return __mean(pred_labels, gt_labels, metric)
 
@@ -185,11 +141,6 @@ def multi_value(
     :param overlap_threshold: minimum value at which the planes are considered intersected
     :return: precision, recall, under_segmented, over_segmented, missed, noise
     """
-    assert (
-        len(pred_labels.shape) == 1
-    ), "Incorrect predicted label array size, expected (n)"
-    assert (
-        len(gt_labels.shape) == 1
-    ), "Incorrect ground truth label array size, expected (n)"
+    __iou_dice_mean_bechmark_asserts(pred_labels, gt_labels)
 
     return __multi_value_benchmark(pred_labels, gt_labels, overlap_threshold)

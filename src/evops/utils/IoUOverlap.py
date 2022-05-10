@@ -11,5 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-UNSEGMENTED_LABEL = 0
-IOU_THRESHOLD = 0.75
+from typing import Any
+from nptyping import NDArray
+
+import numpy as np
+
+import evops.metrics.constants
+from evops.metrics.IoUBenchmark import __iou
+
+
+def __is_overlapped_iou(
+    pred_indices: NDArray[Any, np.int32],
+    gt_indices: NDArray[Any, np.int32],
+) -> bool:
+    """
+    :param pred_indices: indices of points belonging to the given predicted label
+    :param gt_indices: indices of points belonging to the given predicted label
+    :return: true if IoU >= evops.metrics.constants.IOU_THRESHOLD
+    """
+    return __iou(pred_indices, gt_indices) >= evops.metrics.constants.IOU_THRESHOLD

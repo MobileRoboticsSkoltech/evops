@@ -13,34 +13,41 @@
 # limitations under the License.
 from typing import Any
 from nptyping import NDArray
-from sklearn.metrics import precision_score, accuracy_score, recall_score, f1_score
 
 import numpy as np
+
+import evops.metrics.constants
+from evops.utils.MetricsUtils import __get_tp, __filter_unsegmented
 
 
 def __precision(
     pred_labels: NDArray[Any, np.int32],
     gt_labels: NDArray[Any, np.int32],
+    tp_condition: str,
 ) -> np.float64:
-    return precision_score(gt_labels, pred_labels, average="micro")
+    true_positive = __get_tp(pred_labels, gt_labels, tp_condition)
+    pred_labels = __filter_unsegmented(pred_labels)
 
-
-def __accuracy(
-    pred_labels: NDArray[Any, np.int32],
-    gt_labels: NDArray[Any, np.int32],
-) -> np.float64:
-    return accuracy_score(gt_labels, pred_labels)
+    return true_positive / np.unique(pred_labels).size
 
 
 def __recall(
     pred_labels: NDArray[Any, np.int32],
     gt_labels: NDArray[Any, np.int32],
+    tp_condition: str,
 ) -> np.float64:
-    return recall_score(gt_labels, pred_labels, average="micro")
+    true_positive = __get_tp(pred_labels, gt_labels, tp_condition)
+    gt_labels = __filter_unsegmented(gt_labels)
+
+    return true_positive / np.unique(gt_labels).size
 
 
 def __fScore(
     pred_labels: NDArray[Any, np.int32],
     gt_labels: NDArray[Any, np.int32],
+    tp_condition: str,
 ) -> np.float64:
-    return f1_score(gt_labels, pred_labels, average="micro")
+    precision = __precision(pred_labels, gt_labels, tp_condition)
+    recall = __recall(pred_labels, gt_labels, tp_condition)
+
+    return 2 * precision * recall / (precision + recall)
